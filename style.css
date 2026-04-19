@@ -803,3 +803,138 @@ svg defs { display: none; }
   .osint-layout { grid-template-columns: 1fr; }
   .report-kpi-row { grid-template-columns: 1fr 1fr; }
 }
+
+/* =====================================================
+   PHASE 3 — NAV BUTTONS
+   ===================================================== */
+.nav-btn-phase3 { border: 1px solid rgba(249,115,22,0.25) !important; color: rgba(253,186,116,0.85) !important; }
+.nav-btn-phase3:hover { background: rgba(249,115,22,0.12) !important; border-color: rgba(249,115,22,0.45) !important; color: #fb923c !important; }
+.nav-btn-phase3.active { background: rgba(249,115,22,0.18) !important; border-color: rgba(249,115,22,0.6) !important; color: #f97316 !important; }
+
+/* =====================================================
+   PHASE 3 — COMMUNITY INCIDENT REPORTS
+   ===================================================== */
+.reports-layout { display: grid; grid-template-columns: 400px 1fr; gap: 20px; }
+.report-form-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--border-radius); padding: 20px; display: flex; flex-direction: column; gap: 0; }
+.rfc-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 16px; }
+.rfc-label { font-size: 11px; font-weight: 600; color: rgba(200,240,218,0.55); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; margin-top: 10px; }
+.report-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.report-type-btn { background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: 8px; padding: 8px 10px; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: all var(--transition); }
+.report-type-btn:hover { background: rgba(249,115,22,0.1); }
+.report-type-btn.selected { box-shadow: 0 0 0 2px currentColor; font-weight: 700; }
+.rtb-icon { font-size: 16px; flex-shrink: 0; }
+.rtb-label { font-size: 11px; font-weight: 600; color: rgba(200,240,218,0.75); }
+.rfc-coord-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.rfc-coord-input label { display: block; font-size: 10px; color: rgba(200,240,218,0.45); margin-bottom: 3px; }
+.rfc-input { width: 100%; background: var(--bg-input); border: 1px solid var(--glass-border); color: #c8f0da; font-family: var(--font-primary); font-size: 13px; padding: 8px 10px; border-radius: 8px; outline: none; transition: border-color var(--transition); }
+.rfc-input:focus { border-color: rgba(249,115,22,0.5); }
+.rfc-geo-btns { display: flex; gap: 8px; margin-top: 8px; margin-bottom: 2px; }
+.rfc-geo-btn { flex: 1; background: rgba(249,115,22,0.1); border: 1px solid rgba(249,115,22,0.3); color: #fb923c; font-size: 12px; font-weight: 600; padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: all var(--transition); }
+.rfc-geo-btn:hover { background: rgba(249,115,22,0.2); }
+.rfc-select { width: 100%; background: var(--bg-input); border: 1px solid var(--glass-border); color: #c8f0da; font-family: var(--font-primary); font-size: 13px; padding: 8px 10px; border-radius: 8px; outline: none; cursor: pointer; }
+.rfc-select option { background: var(--bg-card); }
+.rfc-textarea { width: 100%; background: var(--bg-input); border: 1px solid var(--glass-border); color: #c8f0da; font-family: var(--font-primary); font-size: 13px; padding: 10px; border-radius: 8px; outline: none; resize: vertical; min-height: 80px; transition: border-color var(--transition); }
+.rfc-textarea:focus { border-color: rgba(249,115,22,0.5); }
+.report-status-msg { font-size: 12px; font-weight: 600; padding: 6px 10px; border-radius: 6px; margin-top: 8px; min-height: 26px; }
+.report-status-msg.error   { color: #ff6b6b; background: rgba(239,68,68,0.1); }
+.report-status-msg.success { color: #3dcc73; background: rgba(61,204,115,0.1); }
+.btn-submit-report { margin-top: 14px; width: 100%; background: linear-gradient(135deg, rgba(249,115,22,0.8), rgba(234,88,12,0.9)); border: 1px solid rgba(249,115,22,0.5); color: #fff; font-family: var(--font-primary); font-size: 14px; font-weight: 700; padding: 13px; border-radius: 10px; cursor: pointer; transition: all var(--transition); box-shadow: 0 4px 20px rgba(249,115,22,0.3); }
+.btn-submit-report:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(249,115,22,0.5); }
+.rpt-chips { display: flex; gap: 8px; flex-shrink: 0; }
+.rpt-chip { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 99px; padding: 6px 14px; font-size: 13px; font-weight: 600; color: rgba(200,240,218,0.7); }
+.rpt-chip.critical { border-color: rgba(239,68,68,0.4); color: #ff6b6b; background: rgba(239,68,68,0.1); }
+.rfp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.rfp-title { font-size: 14px; font-weight: 700; color: rgba(200,240,218,0.8); }
+.rfp-clear-btn { background: transparent; border: 1px solid rgba(200,240,218,0.15); color: rgba(200,240,218,0.4); font-size: 11px; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all var(--transition); }
+.rfp-clear-btn:hover { border-color: rgba(239,68,68,0.4); color: #ff6b6b; }
+.report-feed { display: flex; flex-direction: column; gap: 8px; max-height: calc(100vh - 240px); overflow-y: auto; }
+.report-empty { text-align: center; padding: 60px 20px; color: rgba(200,240,218,0.3); }
+.report-empty span { font-size: 40px; display: block; margin-bottom: 12px; }
+.report-empty p { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.report-empty small { font-size: 12px; }
+.report-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-left: 3px solid; border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: all var(--transition); }
+.report-card:hover { background: var(--bg-card-hover); transform: translateX(3px); }
+.rc-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.rc-icon { font-size: 18px; flex-shrink: 0; }
+.rc-info { flex: 1; }
+.rc-type { font-size: 12px; font-weight: 700; }
+.rc-meta { font-size: 10px; color: rgba(200,240,218,0.4); margin-top: 1px; }
+.rc-urgency { font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 99px; border: 1px solid; white-space: nowrap; letter-spacing: 0.5px; }
+.rc-desc { font-size: 12px; color: rgba(200,240,218,0.65); line-height: 1.5; margin-bottom: 6px; }
+.rc-loc { font-size: 10px; color: rgba(200,240,218,0.35); font-family: monospace; }
+/* Report Map Markers */
+.report-map-marker { position: relative; width: 32px; height: 32px; cursor: pointer; }
+.rmm-pulse { position: absolute; inset: -4px; border-radius: 50%; animation: rmmPulse 2s ease-in-out infinite; }
+.rmm-icon { position: absolute; inset: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+@keyframes rmmPulse { 0%,100% { transform: scale(1); opacity: 0.6; } 50% { transform: scale(1.4); opacity: 0.2; } }
+
+/* =====================================================
+   PHASE 3 — FIRE SPREAD SIMULATOR
+   ===================================================== */
+.firesim-layout { display: grid; grid-template-columns: 1fr 260px; gap: 20px; align-items: start; }
+.firesim-canvas-panel { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--border-radius); overflow: hidden; }
+.fs-canvas-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: var(--bg-surface); border-bottom: 1px solid var(--glass-border); flex-wrap: wrap; gap: 8px; }
+.fs-canvas-header span { font-size: 12px; color: rgba(200,240,218,0.6); }
+.fs-legend { display: flex; gap: 12px; }
+.fs-leg-item { font-size: 11px; color: rgba(200,240,218,0.5); display: flex; align-items: center; gap: 5px; }
+.fs-leg-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.fs-canvas-wrap { background: #050d0a; display: flex; justify-content: center; padding: 0; overflow: hidden; }
+#fire-canvas { display: block; width: 100%; height: auto; max-height: 520px; cursor: crosshair; }
+.firesim-controls-panel { display: flex; flex-direction: column; }
+.fsc-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--border-radius); padding: 18px; }
+.fsc-section-title { font-size: 12px; font-weight: 700; color: rgba(200,240,218,0.7); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; }
+.fsc-control { margin-bottom: 12px; }
+.fsc-control label { font-size: 11px; color: rgba(200,240,218,0.55); display: block; margin-bottom: 5px; }
+.fsc-val { font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--green-300); }
+.fsc-select { width: 100%; background: var(--bg-input); border: 1px solid var(--glass-border); color: #c8f0da; font-family: var(--font-primary); font-size: 13px; padding: 7px 10px; border-radius: 8px; outline: none; cursor: pointer; }
+.fsc-select option { background: var(--bg-card); }
+.fsc-range { width: 100%; accent-color: #f97316; cursor: pointer; margin-top: 4px; }
+.fs-action-row { display: flex; gap: 8px; margin-top: 16px; }
+.fs-btn-run { flex: 1; background: linear-gradient(135deg, rgba(239,68,68,0.8), rgba(220,38,38,0.9)); border: 1px solid rgba(239,68,68,0.5); color: #fff; font-family: var(--font-primary); font-size: 13px; font-weight: 700; padding: 10px; border-radius: 8px; cursor: pointer; transition: all var(--transition); }
+.fs-btn-run:hover:not(:disabled) { box-shadow: 0 4px 16px rgba(239,68,68,0.5); transform: translateY(-1px); }
+.fs-btn-run:disabled { opacity: 0.4; cursor: not-allowed; }
+.fs-btn-reset { background: var(--bg-surface); border: 1px solid var(--glass-border); color: rgba(200,240,218,0.6); font-size: 13px; font-weight: 600; padding: 10px 14px; border-radius: 8px; cursor: pointer; transition: all var(--transition); }
+.fs-btn-reset:hover { background: rgba(200,240,218,0.08); color: #c8f0da; }
+.fs-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fs-stat { background: var(--bg-surface); border-radius: 8px; padding: 10px; text-align: center; border: 1px solid var(--glass-border); }
+.fs-stat-val { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: #fb923c; }
+.fs-stat-lbl { font-size: 9px; color: rgba(200,240,218,0.4); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+/* =====================================================
+   PHASE 3 — SATELLITE BEFORE / AFTER COMPARATOR
+   ===================================================== */
+.cmp-controls-bar { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+.cmp-year-group { display: flex; flex-direction: column; gap: 4px; }
+.cmp-year-group label { font-size: 11px; color: rgba(200,240,218,0.5); font-weight: 600; }
+.cmp-select { background: var(--bg-card); border: 1px solid var(--glass-border); color: #c8f0da; font-family: var(--font-primary); font-size: 14px; font-weight: 700; padding: 8px 12px; border-radius: 8px; outline: none; cursor: pointer; accent-color: var(--green-400); }
+.cmp-select option { background: var(--bg-card); }
+.cmp-vs { font-size: 20px; color: rgba(200,240,218,0.4); padding-bottom: 6px; }
+.cmp-update-btn { background: linear-gradient(135deg, var(--green-700), var(--green-600)); border: 1px solid var(--green-500); color: #fff; font-size: 13px; font-weight: 700; padding: 9px 18px; border-radius: 8px; cursor: pointer; transition: all var(--transition); align-self: flex-end; }
+.cmp-update-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(27,122,62,0.5); }
+.cmp-presets { display: flex; align-items: center; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+.cmp-preset-lbl { font-size: 11px; color: rgba(200,240,218,0.4); }
+.cmp-preset-btn { background: var(--bg-card); border: 1px solid var(--glass-border); color: rgba(200,240,218,0.65); font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all var(--transition); }
+.cmp-preset-btn:hover { border-color: rgba(61,204,115,0.35); color: var(--green-300); background: rgba(61,204,115,0.08); }
+/* Compare viewport */
+.cmp-wrapper { position: relative; width: 100%; height: 460px; border-radius: 12px; overflow: hidden; cursor: col-resize; border: 1px solid var(--glass-border); }
+.cmp-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; }
+.cmp-canvas-right { clip-path: inset(0 0 0 50%); }
+.cmp-divider { position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; background: rgba(255,255,255,0.85); transform: translateX(-50%); z-index: 10; pointer-events: none; }
+.cmp-divider-handle { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); background: #fff; color: #111; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; box-shadow: 0 2px 12px rgba(0,0,0,0.5); }
+.cmp-range-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: col-resize; z-index: 20; margin: 0; padding: 0; }
+.cmp-label-left, .cmp-label-right { position: absolute; top: 14px; background: rgba(0,0,0,0.72); color: #fff; font-family: var(--font-display); font-size: 14px; font-weight: 700; padding: 5px 14px; border-radius: 99px; z-index: 15; pointer-events: none; }
+.cmp-label-left  { left: 14px;  color: #3dcc73; }
+.cmp-label-right { right: 14px; color: #f97316; }
+/* Compare stats */
+.cmp-stats-bar { display: flex; align-items: center; gap: 16px; margin-top: 14px; flex-wrap: wrap; }
+.cmp-stat-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 10px; padding: 12px 18px; text-align: center; flex: 1; min-width: 120px; }
+.cmp-stat-val { font-family: var(--font-display); font-size: 20px; font-weight: 800; }
+.cmp-stat-lbl { font-size: 10px; color: rgba(200,240,218,0.45); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.cmp-period { font-size: 13px; color: rgba(200,240,218,0.5); padding: 0 8px; white-space: nowrap; }
+.cmp-period strong { color: var(--green-300); }
+
+@media (max-width: 1024px) {
+  .reports-layout   { grid-template-columns: 1fr; }
+  .firesim-layout   { grid-template-columns: 1fr; }
+  .cmp-controls-bar { gap: 10px; }
+}

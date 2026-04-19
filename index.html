@@ -12,12 +12,7 @@
   <link href="https://unpkg.com/maplibre-gl@4.1.3/dist/maplibre-gl.css" rel="stylesheet" />
   <script src="https://unpkg.com/maplibre-gl@4.1.3/dist/maplibre-gl.js"></script>
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 
-  <!-- Chart.js Annotation plugin (for forecast tipping-point lines) -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -49,6 +44,9 @@
       <button class="nav-btn" id="nav-species" onclick="switchView('species')">🦅 Species Risk</button>
       <button class="nav-btn" id="nav-scanner" onclick="switchView('scanner')">🔍 Zone Scanner</button>
       <button class="nav-btn nav-btn-phase2" id="nav-osint" onclick="switchView('osint')">🌡️ OSINT</button>
+      <button class="nav-btn nav-btn-phase3" id="nav-reports" onclick="switchView('reports')">📝 Reports</button>
+      <button class="nav-btn nav-btn-phase3" id="nav-firesim" onclick="switchView('firesim')">🔥 Fire Sim</button>
+      <button class="nav-btn nav-btn-phase3" id="nav-compare" onclick="switchView('compare')">🛰️ Compare</button>
       <button class="nav-btn nav-btn-phase2" id="nav-tracks" onclick="switchView('tracks')">📡 Live Tracks</button>
       <button class="nav-btn nav-btn-phase2" id="nav-forecast" onclick="switchView('forecast')">📈 Forecast</button>
       <button class="nav-btn nav-btn-phase2" id="nav-report" onclick="switchView('report')">📋 Gov Report</button>
@@ -604,6 +602,165 @@
     </div>
   </section>
 
+  <!-- ===== PHASE 3: COMMUNITY INCIDENT REPORTS ===== -->
+  <section class="full-view hidden" id="reports-view">
+    <div class="view-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <h1>📝 Community Incident Reports</h1>
+          <p>Field rangers &amp; citizens report live forest incidents — all reports are pinned on the main map</p>
+        </div>
+        <div class="rpt-chips">
+          <div class="rpt-chip"><span id="report-total-count">0</span> Total</div>
+          <div class="rpt-chip critical"><span id="report-critical-count">0</span> Critical</div>
+        </div>
+      </div>
+    </div>
+    <div class="reports-layout">
+      <!-- FORM -->
+      <div class="reports-form-panel">
+        <div class="report-form-card">
+          <div class="rfc-title">📍 New Incident Report</div>
+          <div class="rfc-label">Incident Type</div>
+          <div class="report-type-grid" id="report-type-grid"></div>
+          <div class="rfc-label" style="margin-top:14px">Location Coordinates</div>
+          <div class="rfc-coord-row">
+            <div class="rfc-coord-input">
+              <label>Latitude</label>
+              <input type="number" id="report-lat" placeholder="e.g. 20.5937" step="0.0001" class="rfc-input" />
+            </div>
+            <div class="rfc-coord-input">
+              <label>Longitude</label>
+              <input type="number" id="report-lng" placeholder="e.g. 78.9629" step="0.0001" class="rfc-input" />
+            </div>
+          </div>
+          <div class="rfc-geo-btns">
+            <button class="rfc-geo-btn" id="gps-btn" onclick="autoDetectGPS()">📡 Auto-Detect GPS</button>
+            <button class="rfc-geo-btn" onclick="pickFromMap()">🗺️ Pick from Map</button>
+          </div>
+          <div class="rfc-label">Urgency Level</div>
+          <select id="report-urgency" class="rfc-select">
+            <option value="critical">🔴 Critical — Immediate action needed</option>
+            <option value="high">🟡 High — Urgent within 24 hours</option>
+            <option value="medium" selected>🔵 Medium — Monitor and report</option>
+            <option value="low">🟢 Low — Informational only</option>
+          </select>
+          <div class="rfc-label">Description</div>
+          <textarea id="report-desc" class="rfc-textarea" placeholder="Describe what you observed — area affected, wildlife involved, human activity, approximate scale..."></textarea>
+          <div class="rfc-label">Your Name (optional)</div>
+          <input type="text" id="report-name" class="rfc-input" placeholder="Forest Guard, NGO Volunteer, Citizen..." />
+          <div id="report-status" class="report-status-msg"></div>
+          <button class="btn-submit-report" onclick="submitReport()">📤 Submit Field Report</button>
+        </div>
+      </div>
+      <!-- FEED -->
+      <div class="reports-feed-panel">
+        <div class="rfp-header">
+          <span class="rfp-title">🌍 Live Report Feed</span>
+          <button class="rfp-clear-btn" onclick="clearAllReports()">🗑️ Clear All</button>
+        </div>
+        <div class="report-feed" id="report-feed"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PHASE 3: FIRE SPREAD SIMULATOR ===== -->
+  <section class="full-view hidden" id="firesim-view">
+    <div class="view-header">
+      <h1>🔥 Fire Spread Simulator</h1>
+      <p>Click the map to set an ignition point · Configure wind &amp; moisture · Watch real-time cellular spread animation</p>
+    </div>
+    <div class="firesim-layout">
+      <div class="firesim-canvas-panel">
+        <div class="fs-canvas-header">
+          <span id="fs-origin-label">🖱️ Click the map to set fire origin point</span>
+          <div class="fs-legend">
+            <span class="fs-leg-item"><span class="fs-leg-dot" style="background:#27a057"></span>Forest</span>
+            <span class="fs-leg-item"><span class="fs-leg-dot" style="background:#f97316"></span>Burning</span>
+            <span class="fs-leg-item"><span class="fs-leg-dot" style="background:#1c0800"></span>Burned</span>
+          </div>
+        </div>
+        <div class="fs-canvas-wrap">
+          <canvas id="fire-canvas"></canvas>
+        </div>
+      </div>
+      <div class="firesim-controls-panel">
+        <div class="fsc-card">
+          <div class="fsc-section-title">🌬️ Wind Conditions</div>
+          <div class="fsc-control">
+            <label>Direction</label>
+            <select id="fs-wind-dir" class="fsc-select">
+              <option>N</option><option>NE</option><option>E</option><option>SE</option>
+              <option>S</option><option>SW</option><option>W</option><option>NW</option>
+            </select>
+          </div>
+          <div class="fsc-control">
+            <div style="display:flex;justify-content:space-between"><label>Speed</label><span class="fsc-val" id="fs-wind-label">40 km/h</span></div>
+            <input type="range" id="fs-wind-speed" class="fsc-range" min="0" max="100" value="40" oninput="onFSWindSpeedChange()" />
+          </div>
+          <div class="fsc-section-title" style="margin-top:16px">🌿 Fuel Conditions</div>
+          <div class="fsc-control">
+            <div style="display:flex;justify-content:space-between"><label>Fuel Moisture</label><span class="fsc-val" id="fs-moisture-label">20%</span></div>
+            <input type="range" id="fs-moisture" class="fsc-range" min="0" max="80" value="20" oninput="onFSMoistureChange()" />
+          </div>
+          <div class="fs-action-row">
+            <button class="fs-btn-run" id="fs-run-btn" onclick="runFireSim()" disabled>▶ Run Simulation</button>
+            <button class="fs-btn-reset" onclick="resetFireSim()">↺ Reset</button>
+          </div>
+          <div class="fsc-section-title" style="margin-top:20px">📊 Live Stats</div>
+          <div class="fs-stats-grid">
+            <div class="fs-stat"><div class="fs-stat-val" id="fs-stat-area">0 ha</div><div class="fs-stat-lbl">Area Burned</div></div>
+            <div class="fs-stat"><div class="fs-stat-val" id="fs-stat-time">0 min</div><div class="fs-stat-lbl">Elapsed</div></div>
+            <div class="fs-stat"><div class="fs-stat-val" id="fs-stat-cells">0</div><div class="fs-stat-lbl">Active Cells</div></div>
+            <div class="fs-stat"><div class="fs-stat-val" id="fs-stat-intensity">—</div><div class="fs-stat-lbl">Intensity</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PHASE 3: SATELLITE COMPARATOR ===== -->
+  <section class="full-view hidden" id="compare-view">
+    <div class="view-header">
+      <h1>🛰️ Satellite Before / After Comparator</h1>
+      <p>Drag the slider to compare forest NDVI between any two years · See deforestation loss in one visual</p>
+    </div>
+    <div class="cmp-controls-bar">
+      <div class="cmp-year-group">
+        <label>Year A <span style="color:rgba(200,240,218,0.4);font-size:10px">(Before)</span></label>
+        <select id="cmp-year-a" class="cmp-select"></select>
+      </div>
+      <span class="cmp-vs">↔</span>
+      <div class="cmp-year-group">
+        <label>Year B <span style="color:rgba(200,240,218,0.4);font-size:10px">(After)</span></label>
+        <select id="cmp-year-b" class="cmp-select"></select>
+      </div>
+      <button class="cmp-update-btn" onclick="updateCompare()">🔄 Update</button>
+      <div class="cmp-presets">
+        <span class="cmp-preset-lbl">Presets:</span>
+        <button class="cmp-preset-btn" onclick="setCmpPreset('assam')">🌿 Assam</button>
+        <button class="cmp-preset-btn" onclick="setCmpPreset('ghats')">⛰️ W.Ghats</button>
+        <button class="cmp-preset-btn" onclick="setCmpPreset('mp')">🌲 M.P.</button>
+        <button class="cmp-preset-btn" onclick="setCmpPreset('sunder')">🌊 Sundarbans</button>
+      </div>
+    </div>
+    <div class="cmp-wrapper" id="cmp-wrapper">
+      <canvas id="cmp-left-canvas"  class="cmp-canvas cmp-canvas-left"></canvas>
+      <canvas id="cmp-right-canvas" class="cmp-canvas cmp-canvas-right"></canvas>
+      <div class="cmp-divider" id="cmp-divider"><div class="cmp-divider-handle">⟺</div></div>
+      <input type="range" id="cmp-range" class="cmp-range-input" min="5" max="95" value="50" />
+      <div class="cmp-label-left"  id="cmp-label-left">◀ 2000</div>
+      <div class="cmp-label-right" id="cmp-label-right">2024 ▶</div>
+    </div>
+    <div class="cmp-stats-bar">
+      <div class="cmp-stat-card"><div class="cmp-stat-val" style="color:#ef4444" id="cmp-stat-loss">—</div><div class="cmp-stat-lbl">Forest Lost</div></div>
+      <div class="cmp-stat-card"><div class="cmp-stat-val" style="color:#f59e0b" id="cmp-stat-ndvi">—</div><div class="cmp-stat-lbl">NDVI Change</div></div>
+      <div class="cmp-stat-card"><div class="cmp-stat-val" style="color:#f97316" id="cmp-stat-carbon">—</div><div class="cmp-stat-lbl">Carbon Released</div></div>
+      <div class="cmp-stat-card"><div class="cmp-stat-val" style="color:#38bdf8" id="cmp-stat-species">—</div><div class="cmp-stat-lbl">Species Impacted</div></div>
+      <div class="cmp-period">Period: <strong id="cmp-stat-years">2000–2024</strong></div>
+    </div>
+  </section>
+
   <!-- ===== ZONE POPUP ===== -->
   <div class="zone-popup" id="zone-popup">
     <button class="popup-close" onclick="closePopup()">✕</button>
@@ -612,7 +769,10 @@
   <div class="popup-overlay" id="popup-overlay" onclick="closePopup()"></div>
 
   <script src="data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
   <script src="phase2.js"></script>
+  <script src="phase3.js"></script>
   <script src="app.js"></script>
 </body>
 

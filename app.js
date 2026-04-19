@@ -21,12 +21,23 @@ document.addEventListener('DOMContentLoaded', () => {
   renderNDVIRing();
   startLiveCounters();
   startLiveAlerts();
-  renderMiniCharts(); // sidebar mini charts — always visible
   renderZonesGrid(PROTECTED_ZONES);
   renderSpeciesGrid();
   initPhase2();       // Phase 2: GBIF, AQI, relocation engine
   populateReportAlerts();
+  initPhase3();       // Phase 3: Incident Reports, Fire Sim, Comparator
 });
+
+// Wait for Chart.js CDN to finish loading before rendering sidebar charts
+// (CDN can be slow — polling is more reliable than a fixed timeout)
+function waitForChartJS() {
+  if (typeof Chart !== 'undefined') {
+    renderMiniCharts();
+  } else {
+    setTimeout(waitForChartJS, 50);
+  }
+}
+window.addEventListener('load', waitForChartJS);
 
 // ===== MAP INIT =====
 function initMap() {
@@ -604,11 +615,16 @@ document.addEventListener('click', e => {
 // ===== VIEW SWITCHING =====
 function switchView(view) {
   activeView = view;
-  const allViews = ['timeline', 'zones', 'species', 'scanner', 'osint', 'tracks', 'forecast', 'report'];
+  const allViews = [
+    'timeline', 'zones', 'species', 'scanner',
+    'osint', 'tracks', 'forecast', 'report',
+    'reports', 'firesim', 'compare'
+  ];
   const navBtns = {
     map: 'nav-map', timeline: 'nav-timeline', zones: 'nav-zones',
     species: 'nav-species', scanner: 'nav-scanner',
-    osint: 'nav-osint', tracks: 'nav-tracks', forecast: 'nav-forecast', report: 'nav-report'
+    osint: 'nav-osint', tracks: 'nav-tracks', forecast: 'nav-forecast', report: 'nav-report',
+    reports: 'nav-reports', firesim: 'nav-firesim', compare: 'nav-compare'
   };
 
   // Update nav active state
@@ -642,8 +658,14 @@ function switchView(view) {
     setTimeout(() => { renderForecastCharts(); renderRelocationEngine(); renderTippingPoints(generateForecast()); }, 50);
   }
   if (view === 'tracks') {
-    // Update GBIF stats panel each time
     setTimeout(updateGBIFStats, 100);
+  }
+  // Phase 3 lazy init
+  if (view === 'firesim' && !fireSimInit) {
+    setTimeout(initFireSim, 60);
+  }
+  if (view === 'compare' && !compareInitialized) {
+    setTimeout(initComparator, 60);
   }
 }
 
@@ -763,8 +785,7 @@ function renderTimelineCharts() {
     options: { ...chartDefaults, scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, ticks: { ...chartDefaults.scales.y.ticks, callback: v => v+'Tg' } } } }
   });
 
-  // Right panel mini charts
-  renderMiniCharts();
+  // Note: renderMiniCharts() is called separately on DOMContentLoaded
 }
 
 function renderMiniCharts() {
