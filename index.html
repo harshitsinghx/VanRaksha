@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="VanaRaksha AI — India's Forest Intelligence Platform. Track deforestation, monitor biodiversity zones, and plan reforestation using satellite & NDVI data." />
+  <title>VanaRaksha AI — India Forest Intelligence Platform</title>
+
+  <!-- MapLibre GL -->
+  <link href="https://unpkg.com/maplibre-gl@4.1.3/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@4.1.3/dist/maplibre-gl.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+  <!-- Chart.js Annotation plugin (for forecast tipping-point lines) -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header" id="main-header">
+    <div class="header-left">
+      <div class="logo">
+        <div class="logo-icon">🌿</div>
+        <div class="logo-text">
+          <span class="logo-name">VanaRaksha</span>
+          <span class="logo-tag">AI Forest Intelligence</span>
+        </div>
+      </div>
+    </div>
+    <nav class="header-nav" id="main-nav">
+      <button class="nav-btn active" id="nav-map" onclick="switchView('map')">🗺️ Map</button>
+      <button class="nav-btn" id="nav-timeline" onclick="switchView('timeline')">📊 Timeline</button>
+      <button class="nav-btn" id="nav-zones" onclick="switchView('zones')">🌲 Protected Zones</button>
+      <button class="nav-btn" id="nav-species" onclick="switchView('species')">🦅 Species Risk</button>
+      <button class="nav-btn" id="nav-scanner" onclick="switchView('scanner')">🔍 Zone Scanner</button>
+      <button class="nav-btn nav-btn-phase2" id="nav-osint" onclick="switchView('osint')">🌡️ OSINT</button>
+      <button class="nav-btn nav-btn-phase2" id="nav-tracks" onclick="switchView('tracks')">📡 Live Tracks</button>
+      <button class="nav-btn nav-btn-phase2" id="nav-forecast" onclick="switchView('forecast')">📈 Forecast</button>
+      <button class="nav-btn nav-btn-phase2" id="nav-report" onclick="switchView('report')">📋 Gov Report</button>
+    </nav>
+    <div class="header-right">
+      <div class="live-badge" id="live-indicator">
+        <span class="live-dot"></span>
+        LIVE
+      </div>
+      <div class="data-source-badge">NASA FIRMS + ISRO Bhuvan</div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN LAYOUT ===== -->
+  <main class="main-layout">
+
+    <!-- ===== LEFT SIDEBAR ===== -->
+    <aside class="sidebar" id="left-sidebar">
+
+      <!-- Forest Health Score -->
+      <div class="sidebar-card" id="national-score-card">
+        <div class="card-header">
+          <span class="card-title">National Forest Health</span>
+          <span class="card-badge badge-warning">⚠ Declining</span>
+        </div>
+        <div class="score-ring-wrap">
+          <div class="score-ring" id="score-ring">
+            <svg viewBox="0 0 120 120">
+              <circle class="ring-bg" cx="60" cy="60" r="50" />
+              <circle class="ring-fill" cx="60" cy="60" r="50" id="ring-arc" stroke-dasharray="220 314"
+                stroke-dashoffset="-47" />
+            </svg>
+            <div class="score-center">
+              <span class="score-value" id="score-value">70%</span>
+              <span class="score-label">NDVI Index</span>
+            </div>
+          </div>
+        </div>
+        <div class="score-stats">
+          <div class="stat-item">
+            <span class="stat-num green">713,789</span>
+            <span class="stat-label">km² Forest Cover</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num red">-1.3%</span>
+            <span class="stat-label">Loss This Year</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Alerts -->
+      <div class="sidebar-card" id="alerts-card">
+        <div class="card-header">
+          <span class="card-title">🚨 Active Alerts</span>
+          <span class="card-badge badge-danger" id="alert-count-badge">6 Active</span>
+        </div>
+        <div class="alerts-list" id="alerts-list">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <!-- Layer Controls -->
+      <div class="sidebar-card" id="layers-card">
+        <div class="card-header">
+          <span class="card-title">🗂️ Map Layers</span>
+        </div>
+        <div class="layer-controls">
+          <label class="layer-toggle" id="layer-ndvi-label">
+            <input type="checkbox" id="layer-ndvi" checked onchange="toggleLayer('ndvi', this.checked)" />
+            <span class="toggle-slider"></span>
+            <span class="layer-name">NDVI Heatmap</span>
+            <span class="layer-source">NASA MODIS</span>
+          </label>
+          <label class="layer-toggle" id="layer-deforestation-label">
+            <input type="checkbox" id="layer-deforestation" checked
+              onchange="toggleLayer('deforestation', this.checked)" />
+            <span class="toggle-slider"></span>
+            <span class="layer-name">Deforestation Zones</span>
+            <span class="layer-source">Hansen GFW</span>
+          </label>
+          <label class="layer-toggle" id="layer-protected-label">
+            <input type="checkbox" id="layer-protected" checked onchange="toggleLayer('protected', this.checked)" />
+            <span class="toggle-slider"></span>
+            <span class="layer-name">Protected Areas</span>
+            <span class="layer-source">MoEFCC</span>
+          </label>
+          <label class="layer-toggle" id="layer-fires-label">
+            <input type="checkbox" id="layer-fires" checked onchange="toggleLayer('fires', this.checked)" />
+            <span class="toggle-slider"></span>
+            <span class="layer-name">Fire Hotspots</span>
+            <span class="layer-source">NASA FIRMS</span>
+          </label>
+          <label class="layer-toggle" id="layer-species-label">
+            <input type="checkbox" id="layer-species" onchange="toggleLayer('species', this.checked)" />
+            <span class="toggle-slider"></span>
+            <span class="layer-name">Species Corridors</span>
+            <span class="layer-source">GBIF + WII</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Timeline Slider -->
+      <div class="sidebar-card" id="timeline-slider-card">
+        <div class="card-header">
+          <span class="card-title">⏳ Historical View</span>
+          <span class="card-badge badge-info" id="year-display">2024</span>
+        </div>
+        <input type="range" id="year-slider" class="year-slider" min="2000" max="2024" value="2024"
+          oninput="onYearChange(this.value)" />
+        <div class="slider-labels">
+          <span>2000</span>
+          <span>2010</span>
+          <span>2024</span>
+        </div>
+        <p class="slider-hint">Drag to see NDVI & forest loss changes over time</p>
+      </div>
+
+    </aside>
+
+    <!-- ===== MAP VIEW ===== -->
+    <div class="map-container" id="map-view">
+      <div id="map"></div>
+
+      <!-- Map Search -->
+      <div class="map-search-bar" id="map-search-bar">
+        <span class="search-icon">🔎</span>
+        <input type="text" id="map-search-input" placeholder="Search state, district, or reserve..."
+          oninput="filterSearch(this.value)" />
+        <div class="search-dropdown" id="search-dropdown"></div>
+      </div>
+
+      <!-- Map Legend -->
+      <div class="map-legend" id="map-legend">
+        <div class="legend-title">NDVI Index</div>
+        <div class="legend-gradient"></div>
+        <div class="legend-labels">
+          <span>0.0 Bare</span>
+          <span>0.5 Moderate</span>
+          <span>1.0 Dense</span>
+        </div>
+        <div class="legend-items">
+          <div class="legend-item"><span class="legend-dot" style="background:#ff4444"></span>Fire hotspot</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#ff9900"></span>Deforestation</div>
+          <div class="legend-item"><span class="legend-dot"
+              style="background:#00aaff88; border: 2px solid #00aaff"></span>Protected area</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#ffdd00"></span>Species corridor</div>
+        </div>
+      </div>
+
+      <!-- Coordinates Display -->
+      <div class="coords-display" id="coords-display">
+        <span id="coords-lat">20.5937°N</span>
+        <span class="coords-sep">|</span>
+        <span id="coords-lng">78.9629°E</span>
+        <span class="coords-sep">|</span>
+        <span id="coords-zoom">Zoom: 5</span>
+      </div>
+
+      <!-- Click to Scan CTA -->
+      <div class="scan-cta" id="scan-cta" onclick="switchView('scanner')">
+        <span>🔍</span> Click map to scan zone
+      </div>
+    </div>
+
+    <!-- ===== RIGHT PANEL ===== -->
+    <aside class="right-panel" id="right-panel">
+
+      <!-- Deforestation Rate -->
+      <div class="sidebar-card" id="deforate-card">
+        <div class="card-header">
+          <span class="card-title">Deforestation Rate</span>
+        </div>
+        <canvas id="defo-chart" height="130"></canvas>
+      </div>
+
+      <!-- NDVI Trend -->
+      <div class="sidebar-card" id="ndvi-trend-card">
+        <div class="card-header">
+          <span class="card-title">NDVI Trend (2000–2024)</span>
+        </div>
+        <canvas id="ndvi-chart" height="130"></canvas>
+      </div>
+
+      <!-- Top Threat Zones -->
+      <div class="sidebar-card" id="threat-zones-card">
+        <div class="card-header">
+          <span class="card-title">🔴 Top Threat Zones</span>
+        </div>
+        <div class="threat-list" id="threat-list">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="sidebar-card quick-stats-card" id="quick-stats-card">
+        <div class="quick-stat" id="qs-1">
+          <span class="qs-icon">🌳</span>
+          <div>
+            <div class="qs-num" id="qs-trees">2.4M</div>
+            <div class="qs-label">Trees Lost Today</div>
+          </div>
+        </div>
+        <div class="quick-stat" id="qs-2">
+          <span class="qs-icon">🔥</span>
+          <div>
+            <div class="qs-num" id="qs-fires">124</div>
+            <div class="qs-label">Active Fire Alerts</div>
+          </div>
+        </div>
+        <div class="quick-stat" id="qs-3">
+          <span class="qs-icon">🦁</span>
+          <div>
+            <div class="qs-num" id="qs-species">38</div>
+            <div class="qs-label">Species At Risk</div>
+          </div>
+        </div>
+        <div class="quick-stat" id="qs-4">
+          <span class="qs-icon">💨</span>
+          <div>
+            <div class="qs-num" id="qs-co2">1.8GT</div>
+            <div class="qs-label">CO₂ Released/yr</div>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </main>
+
+  <!-- ===== VIEWS (non-map) ===== -->
+
+  <!-- Timeline View -->
+  <section class="full-view hidden" id="timeline-view">
+    <div class="view-header">
+      <h1>📊 Historical Forest Cover Timeline</h1>
+      <p>India's forest cover change from 2000 to 2024 based on Hansen/Landsat data</p>
+    </div>
+    <div class="timeline-grid">
+      <div class="tl-chart-card">
+        <h3>Forest Cover (km²) — 2000 to 2024</h3>
+        <canvas id="tl-cover-chart"></canvas>
+      </div>
+      <div class="tl-chart-card">
+        <h3>Annual Forest Loss by State (Top 8)</h3>
+        <canvas id="tl-state-chart"></canvas>
+      </div>
+      <div class="tl-chart-card">
+        <h3>NDVI Mean Score — India</h3>
+        <canvas id="tl-ndvi-full-chart"></canvas>
+      </div>
+      <div class="tl-chart-card">
+        <h3>Carbon Stock Decline (Tg C)</h3>
+        <canvas id="tl-carbon-chart"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- Protected Zones View -->
+  <section class="full-view hidden" id="zones-view">
+    <div class="view-header">
+      <h1>🌲 Protected Zones & National Parks</h1>
+      <p>India's 903 protected areas covering 1,61,221 km² — status and threat level</p>
+    </div>
+    <div class="zones-search-bar">
+      <input type="text" id="zones-search" placeholder="🔎 Search by name or state..."
+        oninput="filterZones(this.value)" />
+      <select id="zones-filter" onchange="filterZones(document.getElementById('zones-search').value)">
+        <option value="all">All Types</option>
+        <option value="national-park">National Parks</option>
+        <option value="tiger-reserve">Tiger Reserves</option>
+        <option value="wildlife-sanctuary">Wildlife Sanctuaries</option>
+        <option value="biosphere">Biosphere Reserves</option>
+      </select>
+    </div>
+    <div class="zones-grid" id="zones-grid">
+      <!-- filled by JS -->
+    </div>
+  </section>
+
+  <!-- Species Risk View -->
+  <section class="full-view hidden" id="species-view">
+    <div class="view-header">
+      <h1>🦅 Endangered Species Risk Monitor</h1>
+      <p>Real-time habitat overlap analysis with deforestation zones</p>
+    </div>
+    <div class="species-grid" id="species-grid">
+      <!-- filled by JS -->
+    </div>
+  </section>
+
+  <!-- Zone Scanner View -->
+  <section class="full-view hidden" id="scanner-view">
+    <div class="view-header">
+      <h1>🔍 Reforestation Zone Scanner</h1>
+      <p>AI-powered analysis: point to any degraded zone to see restoration potential</p>
+    </div>
+    <div class="scanner-layout">
+      <div class="scanner-left">
+        <div class="scanner-input-card">
+          <h3>Select Zone to Analyze</h3>
+          <div class="scanner-coords">
+            <div class="coord-input">
+              <label>Latitude</label>
+              <input type="number" id="scan-lat" value="20.59" step="0.01" />
+            </div>
+            <div class="coord-input">
+              <label>Longitude</label>
+              <input type="number" id="scan-lng" value="78.96" step="0.01" />
+            </div>
+          </div>
+          <select id="scan-state" class="scanner-select">
+            <option value="">Select State</option>
+            <option>Madhya Pradesh</option>
+            <option>Arunachal Pradesh</option>
+            <option>Chhattisgarh</option>
+            <option>Odisha</option>
+            <option>Maharashtra</option>
+            <option>Uttarakhand</option>
+            <option>Karnataka</option>
+            <option>Assam</option>
+          </select>
+          <button class="btn-scan" id="scan-button" onclick="runScan()">
+            <span class="btn-icon">⚡</span> Analyze Zone
+          </button>
+        </div>
+        <div class="scanner-params-card" id="scanner-params">
+          <h3>Zone Parameters</h3>
+          <div class="param-grid" id="param-grid">
+            <!-- filled after scan -->
+          </div>
+        </div>
+      </div>
+      <div class="scanner-right">
+        <div class="scanner-result-card" id="scanner-result">
+          <div class="scanner-idle">
+            <div class="scanner-idle-icon">🛰️</div>
+            <h3>Ready to Scan</h3>
+            <p>Enter coordinates or select a state and click "Analyze Zone" to get AI-powered reforestation insights</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== OSINT VIEW ===== -->
+  <section class="full-view hidden" id="osint-view">
+    <div class="view-header">
+      <h1>🌡️ OSINT Intelligence Layer</h1>
+      <p>Live weather, wind patterns &amp; air quality overlaid on forest monitoring — powered by Windy &amp; OpenAQ</p>
+    </div>
+    <div class="osint-layout">
+      <div class="osint-main">
+        <div class="osint-card">
+          <div class="osint-card-header">
+            <span class="osint-card-title">🌬️ Wind &amp; Weather — Windy Intelligence</span>
+            <span class="osint-card-sub">Real-time ECMWF wind patterns over India — see how fire spread vectors align
+              with current winds</span>
+          </div>
+          <div class="windy-wrap">
+            <iframe id="windy-frame"
+              src="https://embed.windy.com/embed2.html?lat=21.0&lon=82.0&detailLat=21.0&detailLon=82.0&width=100%25&height=100%25&zoom=5&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"
+              frameborder="0" allowfullscreen>
+            </iframe>
+          </div>
+          <div class="windy-controls">
+            <button class="windy-btn" onclick="switchWindyLayer('wind')">💨 Wind</button>
+            <button class="windy-btn" onclick="switchWindyLayer('rain')">🌧️ Rain</button>
+            <button class="windy-btn" onclick="switchWindyLayer('temp')">🌡️ Temp</button>
+            <button class="windy-btn" onclick="switchWindyLayer('fires')">🔥 Fire Weather</button>
+            <button class="windy-btn" onclick="switchWindyLayer('pm2p5')">🌫️ PM2.5</button>
+            <button class="windy-btn" onclick="switchWindyLayer('so2')">☁️ SO₂</button>
+          </div>
+        </div>
+      </div>
+      <div class="osint-sidebar">
+        <div class="osint-card">
+          <div class="osint-card-title">🌫️ Air Quality Index — Major Cities</div>
+          <div class="aqi-grid" id="aqi-grid">
+            <div class="aqi-loading">Loading AQI data...</div>
+          </div>
+        </div>
+        <div class="osint-card" style="margin-top:12px">
+          <div class="osint-card-title">🔗 OSINT Data Sources</div>
+          <div class="osint-source-list">
+            <a class="osint-source-link" href="https://firms.modaps.eosdis.nasa.gov/map/#d:24hrs;@82.0,22.0,5z"
+              target="_blank">🔥 NASA FIRMS Fire Map</a>
+            <a class="osint-source-link" href="https://bhuvan.nrsc.gov.in/bhuvan_links.php" target="_blank">🛰️ ISRO
+              Bhuvan Portal</a>
+            <a class="osint-source-link" href="https://globalforestwatch.org" target="_blank">🌲 Global Forest Watch</a>
+            <a class="osint-source-link" href="https://www.gbif.org/occurrence/search?country=IN&has_coordinate=true"
+              target="_blank">📍 GBIF India Occurrences</a>
+            <a class="osint-source-link" href="https://earthengine.google.com/" target="_blank">🌍 Google Earth
+              Engine</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== LIVE TRACKS VIEW ===== -->
+  <section class="full-view hidden" id="tracks-view">
+    <div class="view-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <h1>📡 Live Species Tracking</h1>
+          <p>Real-time GBIF species occurrence data for India — click any sighting to fly to location</p>
+        </div>
+        <div style="text-align:right">
+          <span class="badge-live-gbif" id="gbif-status">Fetching GBIF data...</span>
+          <div style="margin-top:8px">
+            <button class="btn-refresh" onclick="fetchGBIFOccurrences()">🔄 Refresh</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tracks-layout">
+      <div class="tracks-main">
+        <div class="tracks-header-row">
+          <span class="tracks-section-title">🌍 Recent GBIF Sightings — India</span>
+          <label class="tracks-map-toggle">
+            <input type="checkbox" id="tracks-map-toggle" onchange="toggleGBIFLayer(this.checked)" />
+            <span class="toggle-slider"></span>
+            <span style="font-size:12px;color:rgba(200,240,218,0.7)">Show on Map</span>
+          </label>
+        </div>
+        <div class="gbif-feed" id="gbif-feed">
+          <div style="text-align:center;color:rgba(200,240,218,0.4);padding:40px">Loading GBIF data...</div>
+        </div>
+      </div>
+      <div class="tracks-sidebar">
+        <div class="tracks-legend-card">
+          <div class="tracks-card-title">Species Color Key</div>
+          <div class="tracks-legend" id="tracks-legend">
+            <div class="legend-row"><span class="legend-swatch" style="background:#f59e0b"></span>Bengal Tiger</div>
+            <div class="legend-row"><span class="legend-swatch" style="background:#27a057"></span>Indian Elephant</div>
+            <div class="legend-row"><span class="legend-swatch" style="background:#38bdf8"></span>One-Horned Rhino</div>
+            <div class="legend-row"><span class="legend-swatch" style="background:#a855f7"></span>Snow Leopard</div>
+            <div class="legend-row"><span class="legend-swatch" style="background:#ef4444"></span>Red Panda</div>
+            <div class="legend-row"><span class="legend-swatch" style="background:#fbbf24"></span>Great Indian Bustard
+            </div>
+          </div>
+        </div>
+        <div class="tracks-legend-card" style="margin-top:12px">
+          <div class="tracks-card-title">📊 Sighting Stats</div>
+          <div id="tracks-stats" style="font-size:12px;color:rgba(200,240,218,0.6);padding:8px;">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FORECAST VIEW ===== -->
+  <section class="full-view hidden" id="forecast-view">
+    <div class="view-header">
+      <h1>📈 Deforestation Forecast Engine</h1>
+      <p>50-year projections under 3 policy scenarios · Species relocation recommendations · Tipping point alerts</p>
+    </div>
+    <div class="forecast-layout">
+      <div class="forecast-main">
+        <div class="forecast-chart-card">
+          <h3>Forest Cover Projection 2024–2074 (km²)</h3>
+          <canvas id="forecast-chart" height="220"></canvas>
+        </div>
+        <div class="forecast-reloc-card">
+          <h3>🚨 AI Species Relocation Recommendations</h3>
+          <p style="font-size:12px;color:rgba(200,240,218,0.45);margin-bottom:14px">Based on threat trajectory analysis
+            — highest priority first</p>
+          <div id="relocation-grid"></div>
+        </div>
+      </div>
+      <div class="forecast-sidebar">
+        <div class="tipping-card-wrapper">
+          <div class="forecast-card-title">⏰ Tipping Point Tracker</div>
+          <p style="font-size:11px;color:rgba(200,240,218,0.4);margin-bottom:10px">Year each zone reaches critical
+            threshold (&lt;30% cover)</p>
+          <div id="tipping-grid"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== GOVT REPORT VIEW ===== -->
+  <section class="full-view hidden" id="report-view">
+    <div class="view-header">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h1>📋 Government Intelligence Report</h1>
+          <p>Export a structured PDF report for MoEFCC, Forest Departments, and State Wildlife Boards</p>
+        </div>
+        <button class="btn-export" id="gen-report-btn" onclick="generateGovtReport()">📋 Export PDF Report</button>
+      </div>
+    </div>
+    <div class="report-layout">
+      <div class="report-preview">
+        <div class="report-section">
+          <div class="report-section-title">🌲 National Forest Status</div>
+          <div class="report-kpi-row">
+            <div class="report-kpi">
+              <div class="kpi-val green">713,789</div>
+              <div class="kpi-lbl">km² Forest Cover</div>
+            </div>
+            <div class="report-kpi">
+              <div class="kpi-val red">4,300</div>
+              <div class="kpi-lbl">km² Lost/Year</div>
+            </div>
+            <div class="report-kpi">
+              <div class="kpi-val amber">0.70</div>
+              <div class="kpi-lbl">NDVI Index</div>
+            </div>
+            <div class="report-kpi">
+              <div class="kpi-val blue">4,680 Tg</div>
+              <div class="kpi-lbl">Carbon Stock</div>
+            </div>
+          </div>
+        </div>
+        <div class="report-section">
+          <div class="report-section-title">🔴 Critical Alerts for This Report</div>
+          <div class="report-alert-list" id="report-alert-list"></div>
+        </div>
+        <div class="report-section">
+          <div class="report-section-title">🌱 Carbon Sequestration Calculator</div>
+          <p style="font-size:12px;color:rgba(200,240,218,0.45);margin-bottom:14px">Estimate carbon offset potential for
+            proposed afforestation zones</p>
+          <div class="cc-inputs">
+            <div class="cc-input-group"><label>Area (Hectares)</label><input id="cc-area" type="number" value="1000"
+                min="1" /></div>
+            <div class="cc-input-group"><label>Vegetation Type</label><select id="cc-type">
+                <option>Dense Forest</option>
+                <option>Mixed Forest</option>
+                <option>Grassland</option>
+                <option>Mangrove</option>
+                <option>Degraded Land</option>
+              </select></div>
+            <div class="cc-input-group"><label>Years</label><input id="cc-years" type="number" value="20" min="1"
+                max="100" /></div>
+            <button class="btn-calc" onclick="runCarbonCalc()">⚡ Calculate</button>
+          </div>
+          <div class="cc-result" id="cc-result"></div>
+        </div>
+        <div class="report-section">
+          <div class="report-section-title">📊 50-Year Projection Summary</div>
+          <div class="report-proj-table">
+            <div class="proj-row proj-header">
+              <span>Scenario</span><span>2034</span><span>2044</span><span>2054</span><span>2074</span></div>
+            <div class="proj-row red-row"><span>Business As
+                Usual</span><span>661k</span><span>609k</span><span>557k</span><span>453k</span></div>
+            <div class="proj-row amber-row"><span>Policy
+                Intervention</span><span>682k</span><span>652k</span><span>621k</span><span>559k</span></div>
+            <div class="proj-row green-row"><span>Net Zero
+                Target</span><span>705k</span><span>697k</span><span>689k</span><span>673k</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ZONE POPUP ===== -->
+  <div class="zone-popup" id="zone-popup">
+    <button class="popup-close" onclick="closePopup()">✕</button>
+    <div class="popup-content" id="popup-content"></div>
+  </div>
+  <div class="popup-overlay" id="popup-overlay" onclick="closePopup()"></div>
+
+  <script src="data.js"></script>
+  <script src="phase2.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
